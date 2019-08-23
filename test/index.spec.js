@@ -1,28 +1,28 @@
 /* global describe, it, before */
-
 import chai from 'chai';
-import {x} from '../lib/ginstr-compiler.js';
+import {compile} from '../lib/ginstr-compiler.js';
 
 chai.expect();
-
 const expect = chai.expect;
-
-describe('Given an instance of my Cat library', () => {
-  describe('when I need the name', () => {
-    it('should return the name', () => {
-        const r = x('a');
-        expect(r).to.be.equal('a');
+describe('Compiler', () => {
+    describe('no vars ', () => {
+        it('now() > today()', () => {
+            const script = 'now() > today();';
+            const expression = compile(script);
+            const result = expression();
+            expect(result).to.be.true;
+        });
+        it('1 < 2;', () => {
+            const script = '1 < 2 ;';
+            const expression = compile(script);
+            const result = expression();
+            expect(result).to.be.true;
+        });
+        it('1 > 2;', () => {
+            const script = '1 > 2 ;';
+            const expression = compile(script);
+            const result = expression();
+            expect(result).to.be.false;
+        });
     });
-  });
 });
-
-// describe('Given an instance of my Dog library', () => {
-//   before(() => {
-//     lib = new Dog();
-//   });
-//   describe('when I need the name', () => {
-//     it('should return the name', () => {
-//       expect(lib.name).to.be.equal('Dog');
-//     });
-//   });
-// });
