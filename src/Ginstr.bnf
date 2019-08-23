@@ -1,0 +1,725 @@
+/**
+ * Ginstr Lang: BNF Grammar.
+ */
+
+%{
+
+/**
+ * Creates generic binary expression node.
+ */
+function BinaryExpression(left, operator, right) {
+  return {
+    type: 'BinaryExpression',
+    operator,
+    left,
+    right
+  };
+}
+
+/**
+ * Creates generic binary expression node.
+ */
+function MathExpression(fn, args) {
+  return {
+    type: 'BinaryExpression',
+    operator,
+    left,
+    right
+  };
+}
+
+/**
+ * Creates logical expression node.
+ */
+function LogicalExpression(left, operator, right) {
+  return {
+    type: 'LogicalExpression',
+    operator,
+    left,
+    right
+  };
+}
+
+/**
+ * Creates an unary expression node.
+ */
+function UnaryExpression(operator, argument) {
+  return {
+    type: 'UnaryExpression',
+    operator,
+    argument,
+  };
+}
+
+/**
+ * Creates a literal node.
+ */
+function Literal(typePrefix, value) {
+  return {
+    type: typePrefix + 'Literal',
+    value,
+  };
+}
+
+/**
+ * Creates a NumLiteral node.
+ */
+function NumLiteral(value) {
+  return {
+    type: 'Literal',
+    value: Number(value),
+    raw: value
+  };
+}
+
+/**
+ * Creates an If-statement node.
+ */
+function IfStatement(test, consequent, alternate) {
+  return {
+    type: 'IfStatement',
+    test,
+    consequent,
+    alternate,
+  };
+}
+
+/**
+ * ForPropStatement.
+ */
+function ForPropStatement(left, right, body) {
+  if (left.type === 'VariableDeclaration' && left.declarations.length !== 1) {
+    throw new Error(
+      'SyntaxError: Invalid left-hand side in for-prop loop: ' +
+      'Must have a single binding.'
+    );
+  }
+
+  return {
+    type: 'ForPropStatement',
+    left,
+    right,
+    body,
+  };
+}
+
+function BlockStatement(statements) {
+  enforceBlockStatementList(statements);
+  return {
+    type: 'BlockStatement',
+    statements,
+  };
+}
+
+function ObjectLiteral(properties) {
+  enforceObjectProperties(properties);
+  return {
+    type: 'ObjectLiteral',
+    properties,
+  }
+}
+
+/**
+ * See `enforceObjectProperties`.
+ */
+function enforceBlockStatementList(nodes) {
+  nodes.forEach(node => {
+    if (node.type == 'Property') {
+      throw new Error(
+        'Block: invalid statement.'
+      );
+    }
+  });
+}
+
+/**
+ * Since we use cover grammar to parse blocks and objects,
+ * this function checks that all entries in a block are
+ * object properties.
+ */
+function enforceObjectProperties(nodes) {
+  nodes.forEach(node => {
+    if (node.type !== 'Property') {
+      throw new Error(
+        'ObjectLiteral: invalid property declaration.'
+      );
+    }
+  });
+}
+
+/**
+ * MemberExpression.
+ */
+function MemberExpression(object, property) {
+  return {
+    type: 'MemberExpression',
+    computed: false,
+    object,
+    property,
+  };
+}
+
+%}
+
+/**
+ * The `THEN` precedence is lower, than of `ELSE`, so
+ * no shift-reduce conflict, and no "dangling-else" problem.
+ */
+%nonassoc THEN
+%nonassoc ELSE
+
+%%
+
+/**
+ * Main Program.
+ */
+Program
+  : ReturnStatement
+    { $$ =  $1 }
+  ;
+
+/**
+ * StatementList.
+ */
+StatementList
+  : Statement
+      { $$ = [$1] }
+
+  | StatementList Statement
+      { $1.push($2); $$ = $1 }
+  ;
+
+/**
+ * Statements.
+ */
+Statement
+  : BlockStatement
+  | EmptyStatement
+  | VariableDeclaration
+  | FunctionDeclaration
+  | ExpressionStatement
+  | IfStatement
+  | IterationStatement
+  | ReturnStatement
+  | BreakStatement
+  | ContinueStatement
+  ;
+
+/**
+ * EmptyStatement.
+ */
+EmptyStatement
+  : SEMICOLON
+    {
+      $$ = {
+        type: 'EmptyStatement',
+      }
+    }
+  ;
+
+/**
+ * BlockStatement.
+ */
+BlockStatement
+  : BlockOrObject
+    {
+      $$ = BlockStatement($1)
+    }
+  ;
+
+/**
+ * BlockOrObject.
+ *
+ * Cover grammar: { } at statement position should be parsed as a Block,
+ * however at expression position should be parsed as ObjectLiteral.
+ *
+ * We could use lookahead restrictions by doubling the expression
+ * productions (using "NoCurly" version of expression productions) in order
+ * to parse `ExpressionStatement` correctly, however we choose here to use
+ * cover grammar with single `BlockOrObject` production, and enforcing
+ * needed nodes (object properties or statement list) based on the
+ * statement or expression position.
+ */
+BlockOrObject
+  : LCURLY OptBlockOrObjectEntries RCURLY
+    { $$ = $2 }
+  ;
+
+/**
+ * OptBlockOrObjectEntries.
+ *
+ * Cover grammar: see `BlockOrObject`.
+ */
+OptBlockOrObjectEntries
+  : StatementList
+
+  | PropertyList OptComma
+    { $$ = $1 }
+
+  | /* empty */
+    { $$ = [] }
+  ;
+
+/**
+ * ForPropStatementInit.
+ */
+ForPropStatementInit
+  : VariableDeclarationListInit
+  | LeftHandSideExpression
+  ;
+
+/**
+ * ForStatementInit.
+ */
+OptForStatementInit
+  : VariableDeclarationListInit
+  | Expression
+  | /* empty */ { $$ = null }
+  ;
+
+/**
+ * ReturnStatement.
+ */
+ReturnStatement
+  : OptExpression SEMICOLON
+    {
+      $$ = {
+        type: 'ReturnStatement',
+        argument: $1,
+      }
+    }
+  ;
+
+/**
+ * BreakStatement.
+ */
+BreakStatement
+  : BREAK SEMICOLON
+    {
+      $$ = {
+        type: 'BreakStatement',
+      }
+    }
+  ;
+
+/**
+ * ContinueStatement.
+ */
+ContinueStatement
+  : CONTINUE SEMICOLON
+    {
+      $$ = {
+        type: 'ContinueStatement',
+      }
+    }
+  ;
+
+/**
+ * Optional expression.
+ */
+OptExpression
+  : Expression
+  | /* empty */ { $$ = null }
+  ;
+
+/**
+ * Optional Identifier.
+ */
+OptIdentifier
+  : Identifier
+  | /* empty */ { $$ = null }
+  ;
+
+/**
+ * OptFormalParameterList.
+ */
+OptFormalParameterList
+  : FormalParameterList
+  | /* empty */ { $$ = [] }
+  ;
+
+/**
+ * FormalParameterList.
+ */
+FormalParameterList
+  : Identifier
+    { $$ = [$1] }
+
+  | FormalParameterList COMMA Identifier
+    { $1.push($3); $$ = $1 }
+  ;
+
+/**
+ * IfStatement.
+ */
+IfStatement
+  : IF LPAREN Expression RPAREN Statement %prec THEN
+    { $$ = IfStatement($3, $5) }
+
+  | IF LPAREN Expression RPAREN Statement ELSE Statement
+    { $$ = IfStatement($3, $5, $7) }
+  ;
+
+/**
+ * ExpressionStatement.
+ */
+ExpressionStatement
+  : Expression SEMICOLON
+    {
+      $$ = {
+        type: 'ExpressionStatement',
+        expression: $1,
+      }
+    }
+  ;
+
+/**
+ * Expression.
+ */
+Expression
+  : AssignmentExpression
+    { $$ = $1 }
+  ;
+
+/**
+ * Literal (numbers, and strings).
+ */
+Literal
+  : StringLiteral
+  | NumericLiteral
+  | TRUE   { $$ = Literal('Boolean', true) }
+  | FALSE  { $$ = Literal('Boolean', false) }
+  | NULL   { $$ = Literal('Null', null) }
+  ;
+
+/**
+ * StringLiteral.
+ */
+StringLiteral
+  : STRING { $$ = Literal('String', $1) }
+  ;
+
+/**
+ * NumericLiteral.
+ */
+NumericLiteral
+  : NUMBER { $$ = NumLiteral($1) }
+  ;
+
+/**
+ * Primary expression.
+ */
+PrimaryExpression
+  : LeftHandSideExpression
+  | Literal
+  | ArrayLiteral
+  | ObjectLiteral
+  ;
+
+/**
+ * ArrayLiteral.
+ */
+ArrayLiteral
+  : LBRACKET OptElementList RBRACKET
+    {
+      $$ = {
+        type: 'ArrayLiteral',
+        elements: $2,
+      }
+    }
+  ;
+
+/**
+ * OptElementList.
+ */
+OptElementList
+  : ElementList OptComma
+    { $$ = $1 }
+
+  | /* empty */
+    { $$ = [] }
+  ;
+
+/**
+ * OptComma.
+ */
+OptComma
+  : COMMA
+  | /* empty */ { $$ = null }
+  ;
+
+/**
+ * ElementList.
+ */
+ElementList
+  : AssignmentExpression
+    { $$ = [$1] }
+
+  | ElementList COMMA AssignmentExpression
+    { $1.push($3); $$ = $1 }
+  ;
+
+/**
+ * ObjectLiteral.
+ */
+ObjectLiteral
+  : BlockOrObject
+    { $$ = ObjectLiteral($1) }
+  ;
+
+/**
+ * PropertyList.
+ */
+PropertyList
+  : PropertyAssignment
+    { $$ = [$1] }
+
+  | PropertyList COMMA PropertyAssignment
+    { $1.push($3); $$ = $1 }
+  ;
+
+/**
+ * PropertyAssignment.
+ */
+PropertyAssignment
+  : PropertyName COLON AssignmentExpression
+    {
+      $$ = {
+        type: 'Property',
+        key: $1,
+        value: $3,
+      }
+    }
+  ;
+
+/**
+ * PropertyName.
+ */
+PropertyName
+  : StringLiteral
+  | Identifier
+  ;
+
+/**
+ * ParenthisizedExpression.
+ */
+ParenthisizedExpression
+  : LPAREN Expression RPAREN { $$ = $2 }
+  ;
+
+/**
+ * Identifier.
+ */
+Identifier
+  : IDENTIFIER
+    { $$ = {
+        type: 'Identifier',
+        name: $1,
+      }
+    }
+  ;
+
+/**
+ * Left-hand side expression.
+ *
+ * foo = 10;
+ * foo['bar'] = 10;
+ * foo.bar = 20;
+ */
+LeftHandSideExpression
+  : MemberExpression
+  ;
+
+/**
+ * MemberExpression.
+ */
+MemberExpression
+  : MemberExpression LBRACKET Expression RBRACKET
+    { $$ = MemberExpression($1, $3)}
+
+  | MemberExpression DOT Identifier
+    { $$ = MemberExpression($1, $3)}
+
+  | Identifier
+  ;
+
+/**
+ * Assignment expression.
+ *
+ * AssignmentOperator: =, *=, /=, +=, -=,
+ *
+ * x = y
+ * x *= y
+ * x /= y
+ * x += y
+ * x -= y
+ */
+AssignmentExpression
+  : LogicalORExpression
+  ;
+
+/**
+ * AssignmentOperator: =, *=, /=, +=, -=.
+ */
+AssignmentOperator
+  : SIMPLE_ASSIGN
+  | COMPLEX_ASSIGN
+  ;
+
+/**
+ * Logical OR expression.
+ *
+ * x || y
+ */
+LogicalORExpression
+  : LogicalANDExpression
+  | LogicalORExpression LOGICAL_OR LogicalANDExpression
+      { $$ = LogicalExpression($1, $2, $3) }
+  ;
+
+/**
+ * Logical AND expression.
+ *
+ * x && y
+ */
+LogicalANDExpression
+  : EqualityExpression
+  | LogicalANDExpression LOGICAL_AND EqualityExpression
+      { $$ = LogicalExpression($1, $2, $3) }
+  ;
+
+/**
+ * Equality expressions.
+ *
+ * EQUALITY_OPERATOR: ==, !=
+ *
+ * x == y
+ * x != y
+ */
+EqualityExpression
+  : RelationalExpression
+  | EqualityExpression EQUALITY_OPERATOR RelationalExpression
+      { $$ = BinaryExpression($1, $2, $3) }
+  ;
+
+/**
+ * Relational expressions.
+ *
+ * RELATIONAL_OPERATOR: >, >=, <, <=
+ *
+ * x > y
+ * x >= y
+ * x < y
+ * x <= y
+ */
+RelationalExpression
+  : AdditiveExpression
+  | RelationalExpression RELATIONAL_OPERATOR AdditiveExpression
+      { $$ = BinaryExpression($1, $2, $3) }
+  ;
+
+/**
+ * Additive expressions.
+ *
+ * ADDITIVE_OPERATOR: +, -
+ *
+ * x + y
+ * x - y
+ */
+AdditiveExpression
+  : MultiplicativeExpression
+  | AdditiveExpression ADDITIVE_OPERATOR MultiplicativeExpression
+      { $$ = BinaryExpression($1, $2, $3) }
+  ;
+
+/**
+ * Additive expressions.
+ *
+ * MULTIPLICATIVE_OPERATOR: *, /
+ *
+ * x * y
+ * x / y
+ */
+MultiplicativeExpression
+  : UnaryExpression
+  | MultiplicativeExpression MULTIPLICATIVE_OPERATOR UnaryExpression
+      { $$ = BinaryExpression($1, $2, $3) }
+  ;
+
+/**
+ * Unary expression.
+ */
+UnaryExpression
+  : PrimaryExpression
+  | CallExpression
+  | ADDITIVE_OPERATOR UnaryExpression
+    { $$ = UnaryExpression($1, $2) }
+  ;
+
+/**
+ * CallExpression.
+ */
+CallExpression
+  : Callee Arguments
+    {
+      $$ = {
+        type: 'CallExpression',
+        callee: $1,
+        arguments: $2,
+      };
+    }
+  ;
+
+/**
+ * Callee.
+ *
+ * Simple function call `foo();` or chained `foo()();`.
+ */
+Callee
+  : LeftHandSideExpression
+  | CustomFunctions
+  | CallExpression
+  ;
+
+/**
+ * Call expression arguments.
+ */
+Arguments
+  : LPAREN OptArgumentList RPAREN
+    { $$ = $2 }
+  ;
+
+/**
+ * OptArgumentList.
+ */
+OptArgumentList
+  : ArgumentList
+  | /* empty */ { $$ = [] }
+  ;
+
+/**
+ * ArgumentList.
+ */
+ArgumentList
+  : AssignmentExpression
+    { $$ = [$1] }
+
+  | ArgumentList COMMA AssignmentExpression
+    { $$ = $1; $1.push($3) }
+  ;
+
+CustomExpressions
+ : FN
+ { $$ = {
+     "type": "Identifier",
+     "name": $1
+     }
+ };
+
+CustomFunctions
+  : CustomExpressions
+  { $$ = MemberExpression({
+            "type": "Identifier",
+            "name": "fns"
+            }, $1)
+  } ;

@@ -1,0 +1,49 @@
+{
+  "name": "ginstr-compiler",
+  "version": "1.0.0",
+  "description": "Language to define business logic",
+  "main": "lib/compiler.js",
+  "scripts": {
+    "build": "npm run build:parser && npm run build:compiler && webpack --mode=production && npm run test",
+    "build:parser": "syntax-cli -g ./src/Ginstr.bnf --lex ./src/Ginstr.lex  --mode lalr1 -o ./lib/ginstr-parser.js",
+    "build:compiler": "webpack --mode=development && npm run test",
+    "dev": "webpack --progress --colors --watch --mode=development",
+    "test": "mocha --colors --compilers js:@babel/register ./test/*.spec.js",
+    "test:watch": "mocha --require babel-register --colors -w ./test/*.spec.js",
+    "repl": "node -i -e \"$(< ./lib/webpack-library-starter.js)\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ua9msn/ginstrlang"
+  },
+  "keywords": [
+    "businesslogic",
+    "language",
+    "ginstr"
+  ],
+  "author": "Serge Balykov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ua9msn/ginstrlang/issues"
+  },
+  "homepage": "https://github.com/ua9msn/ginstrlang",
+  "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/register": "^7.5.5",
+    "babel-eslint": "^8.2.6",
+    "babel-loader": "^8.0.6",
+    "chai": "^4.2.0",
+    "eslint": "^5.16.0",
+    "eslint-loader": "^2.2.1",
+    "mocha": "^4.1.0",
+    "syntax-cli": "^0.1.12",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.7"
+  },
+  "dependencies": {
+    "escodegen": "^1.12.0"
+  }
+}
