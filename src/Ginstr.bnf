@@ -54,10 +54,10 @@ function UnaryExpression(operator, argument) {
 /**
  * Creates a literal node.
  */
-function Literal(typePrefix, value) {
+function Literal(value) {
   return {
              type: 'Literal',
-             value: String(value),
+             value: value,
              raw: value
            };
 }
@@ -69,6 +69,17 @@ function NumLiteral(value) {
   return {
     type: 'Literal',
     value: Number(value),
+    raw: value
+  };
+}
+
+/**
+ * Creates a StringLiteral node.
+ */
+function StringLiteral(value) {
+  return {
+    type: 'Literal',
+    value: String(value),
     raw: value
   };
 }
@@ -236,23 +247,6 @@ OptBlockOrObjectEntries
   ;
 
 /**
- * ForPropStatementInit.
- */
-ForPropStatementInit
-  : VariableDeclarationListInit
-  | LeftHandSideExpression
-  ;
-
-/**
- * ForStatementInit.
- */
-OptForStatementInit
-  : VariableDeclarationListInit
-  | Expression
-  | /* empty */ { $$ = null }
-  ;
-
-/**
  * ReturnStatement.
  */
 ReturnStatement
@@ -261,30 +255,6 @@ ReturnStatement
       $$ = {
         type: 'ReturnStatement',
         argument: $1,
-      }
-    }
-  ;
-
-/**
- * BreakStatement.
- */
-BreakStatement
-  : BREAK SEMICOLON
-    {
-      $$ = {
-        type: 'BreakStatement',
-      }
-    }
-  ;
-
-/**
- * ContinueStatement.
- */
-ContinueStatement
-  : CONTINUE SEMICOLON
-    {
-      $$ = {
-        type: 'ContinueStatement',
       }
     }
   ;
@@ -360,25 +330,11 @@ Expression
  * Literal (numbers, and strings).
  */
 Literal
-  : StringLiteral
-  | NumericLiteral
-  | TRUE   { $$ = Literal('Boolean', true) }
-  | FALSE  { $$ = Literal('Boolean', false) }
-  | NULL   { $$ = Literal('Null', null) }
-  ;
-
-/**
- * StringLiteral.
- */
-StringLiteral
-  : STRING { $$ = Literal('String', $1) }
-  ;
-
-/**
- * NumericLiteral.
- */
-NumericLiteral
-  : NUMBER { $$ = NumLiteral($1) }
+  : STRING { $$ = StringLiteral($1) }
+  | NUMBER { $$ = NumLiteral($1) }
+  | TRUE   { $$ = Literal(true) }
+  | FALSE  { $$ = Literal(false) }
+  | NULL   { $$ = Literal(null) }
   ;
 
 /**
