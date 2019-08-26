@@ -56,9 +56,10 @@ function UnaryExpression(operator, argument) {
  */
 function Literal(typePrefix, value) {
   return {
-    type: typePrefix + 'Literal',
-    value,
-  };
+             type: 'Literal',
+             value: String(value),
+             raw: value
+           };
 }
 
 /**
@@ -170,29 +171,17 @@ function MemberExpression(object, property) {
 
 %%
 
-/**
- * Main Program.
- */
-Program
-  : ReturnStatement
-    { $$ =  $1 }
-  ;
+// Main Program.
+Program : ReturnStatement { $$ =  $1 } ;
 
-/**
- * StatementList.
- */
+// * StatementList.
 StatementList
-  : Statement
-      { $$ = [$1] }
-
-  | StatementList Statement
-      { $1.push($2); $$ = $1 }
+  : Statement { $$ = [$1] }
+  | StatementList Statement { $1.push($2); $$ = $1 }
   ;
 
-/**
- * Statements.
- */
-Statement
+// * Statements.
+ Statement
   : BlockStatement
   | EmptyStatement
   | VariableDeclaration
@@ -205,27 +194,13 @@ Statement
   | ContinueStatement
   ;
 
-/**
- * EmptyStatement.
- */
+// * EmptyStatement.
 EmptyStatement
-  : SEMICOLON
-    {
-      $$ = {
-        type: 'EmptyStatement',
-      }
-    }
-  ;
+  : SEMICOLON { $$ = { type: 'EmptyStatement' } } ;
 
-/**
- * BlockStatement.
- */
+// * BlockStatement.
 BlockStatement
-  : BlockOrObject
-    {
-      $$ = BlockStatement($1)
-    }
-  ;
+  : BlockOrObject { $$ = BlockStatement($1) } ;
 
 /**
  * BlockOrObject.
