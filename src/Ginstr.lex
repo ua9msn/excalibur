@@ -15,8 +15,6 @@
     // ------------------------------------------------
     // Keywords.
 
-    [`\\bif\\b`,                   `return 'IF'`],
-    [`\\belse\\b`,                 `return 'ELSE'`],
     [`\\btrue\\b`,                 `return 'TRUE'`],
     [`\\bfalse\\b`,                `return 'FALSE'`],
     [`\\bnull\\b`,                 `return 'NULL'`],
@@ -43,6 +41,7 @@
     [`;`,                       `return 'SEMICOLON'`],
     [`,`,                       `return 'COMMA'`],
     [`\\.`,                     `return 'DOT'`],
+    [`\\?`,                     `return 'QUESTION'`],
 
     // ------------------------------------------------
     // Logical operators: &&, ||

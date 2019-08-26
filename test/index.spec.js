@@ -87,5 +87,20 @@ describe('Compiler', () => {
                 })
             })
     });
+    describe(' if ', () => {
+        const tests = [
+            {script: 'record.b > 5 ? 1 : 3 ;', argument: {b: 10}, result: 1 },
+            {script: 'record.b > 5 ? 1 : 3 ;', argument: {b: 0}, result: 3 },
+        ];
+        tests
+            .forEach(test => {
+                const name = test.script + ' ' + (test.expect || '');
+                it(name, function () {
+                    const expression = compile(test.script);
+                    const result = expression(test.argument);
+                    assert.deepEqual(result, test.result);
+                })
+            })
+    });
 
 });
