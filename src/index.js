@@ -18,17 +18,6 @@ export function compile(script) {
         const fnBody = escodegen.generate(ast);
         const expression = new Function('record', 'fns', fnBody);
         return function (record) {
-            const fns = {
-                max:   Math.max,
-                min:   Math.min,
-                round: Math.round,
-                now:   Date.now,
-                today: () => {
-                    let x = new Date();
-                    x.setHours(0, 0, 0, 0);
-                    return x.getTime();
-                }
-            };
             return expression(record, fns);
         };
     } catch (err) {

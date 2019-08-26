@@ -8,8 +8,8 @@
     "build:parser": "syntax-cli -g ./src/Ginstr.bnf --lex ./src/Ginstr.lex  --mode lalr1 -o ./lib/ginstr-parser.js",
     "build:compiler": "webpack --mode=production",
     "dev": "webpack --progress --colors --watch --mode=development",
-    "test": "mocha --colors --compilers js:@babel/register ./test/*.spec.js",
-    "test:watch": "mocha --require babel-register --colors -w ./test/*.spec.js",
+    "test": "mocha --colors --require @babel/register ./test/*.spec.js",
+    "test:watch": "mocha --colors --require @babel/register  -w ./test/*.spec.js",
     "repl": "node -i -e \"$(< ./lib/webpack-library-starter.js)\""
   },
   "repository": {
