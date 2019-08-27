@@ -69,7 +69,7 @@
     // ------------------------------------------------
     // Strings.
     [`"[^"]*"`,                 `yytext = yytext.slice(1, -1); return 'STRING';`],
-    [`'[^']*'`,                 `yytext = yytext.slice(1, -1); return 'CHAR';`],
+    [`'[^']*'`,                 `yytext = yytext.slice(1, -1); return 'STRING';`],
 
     [`{id}+`,                   `return 'IDENTIFIER'`],
   ],

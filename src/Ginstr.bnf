@@ -79,8 +79,8 @@ function NumLiteral(value) {
 function StringLiteral(value) {
   return {
     type: 'Literal',
-    value: String(value),
-    raw: value
+    value: value,
+    raw: "'" + value + "'"
   };
 }
 
@@ -126,7 +126,7 @@ function BlockStatement(statements) {
 function ObjectLiteral(properties) {
   enforceObjectProperties(properties);
   return {
-    type: 'ObjectLiteral',
+    type: 'ObjectExpression',
     properties,
   }
 }
@@ -165,7 +165,7 @@ function enforceObjectProperties(nodes) {
 function MemberExpression(object, property) {
   return {
     type: 'MemberExpression',
-    computed: false,
+    computed: property.type !== 'Identifier',
     object,
     property,
   };
@@ -403,7 +403,7 @@ PropertyList
  * PropertyAssignment.
  */
 PropertyAssignment
-  : PropertyName COLON AssignmentExpression
+  : PropertyName COLON Expression
     {
       $$ = {
         type: 'Property',

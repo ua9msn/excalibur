@@ -57,8 +57,9 @@ describe('Compiler', () => {
     });
     describe(' objects ', () => {
         const tests = [
-            {script: 'record;', argument: {a: 10}, result: {a: 10}, expect: 'propery accessor'},
-            {script: 'record;', argument: {a: {b: 'c'}}, result: {a: {b: 'c'} }, expect: 'deep equality'},
+//            {script: 'record;', argument: {a: {b: 'c'}}, result: {a: {b: 'c'} }, expect: 'deep equality'},
+            {script: 'record.a;', argument: {a: {b: 'c'}}, result: {b: 'c'}, expect: 'deep equality'},
+            {script: `record['a'];`, argument: {a: {b: 'c'}}, result: {b: 'c'}, expect: 'deep equality'},
         ];
         tests
             .forEach(test => {
@@ -91,6 +92,37 @@ describe('Compiler', () => {
         const tests = [
             {script: 'record.b > 5 ? 1 : 3 ;', argument: {b: 10}, result: 1 },
             {script: 'record.b > 5 ? 1 : 3 ;', argument: {b: 0}, result: 3 },
+        ];
+        tests
+            .forEach(test => {
+                const name = test.script + ' ' + (test.expect || '');
+                it(name, function () {
+                    const expression = compile(test.script);
+                    const result = expression(test.argument);
+                    assert.deepEqual(result, test.result);
+                })
+            })
+    });
+    describe(' realLife ', () => {
+        const tests = [
+            // {script: `record['a'] > 5 ? { color: 'red'} : { color: 'green'} ;`, argument: {a: 10}, result: { color: "red"} },
+            // {script: `record['a'] < 5 ? { color: 'red'} : { color: 'green'} ;`, argument: {a: 10}, result: { color: "green"} },
+            {script: `record['a'] == false ? {color: record.b == true ? 'yellow' : 'green' } : { color: 'red'};`,
+                argument: {a: false, b: false},
+                result: {color: "green"}
+            },
+            {script: `record['a'] == true ? record.b == true ? { color:'yellow'} : {color: 'green' } : { color: 'red'};`,
+                argument: {a: true, b: true},
+                result: {color: "yellow"}
+            },
+            {script: `record['a'] == true ? record.b == false ? { color:'yellow'} : {color: 'green' } : { color: 'red'};`,
+                argument: {a: true, b: true},
+                result: {color: "green"}
+            },
+            {script: `record['a'] == false ? record.b == false ? { color:'yellow'} : {color: 'green' } : { color: 'red'};`,
+                argument: {a: true, b: true},
+                result: {color: "red"}
+            },
         ];
         tests
             .forEach(test => {
