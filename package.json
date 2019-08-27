@@ -1,5 +1,5 @@
 {
-  "name": "ginstr-compiler",
+  "name": "ginstr-language",
   "version": "1.0.0",
   "description": "Language to define business logic",
   "main": "lib/ginstr-compiler.js",
@@ -7,14 +7,12 @@
     "build": "npm run build:parser && npm run build:compiler && npm run test",
     "build:parser": "syntax-cli -g ./src/Ginstr.bnf --lex ./src/Ginstr.lex  --mode lalr1 -o ./lib/ginstr-parser.js",
     "build:compiler": "webpack --mode=production",
-    "dev": "webpack --progress --colors --watch --mode=development",
     "test": "mocha --colors --require @babel/register ./test/*.spec.js",
-    "test:watch": "mocha --colors --require @babel/register  -w ./test/*.spec.js",
-    "repl": "node -i -e \"$(< ./lib/webpack-library-starter.js)\""
+    "test:watch": "mocha --colors --require @babel/register  -w ./test/*.spec.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ua9msn/ginstrlang"
+    "url": "https://git.ginstr.com/sbalykov/ginstrlanguage"
   },
   "keywords": [
     "businesslogic",
@@ -24,9 +22,9 @@
   "author": "Serge Balykov",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ua9msn/ginstrlang/issues"
+    "url": "https://git.ginstr.com/sbalykov/ginstrlanguage/issues"
   },
-  "homepage": "https://github.com/ua9msn/ginstrlang",
+  "homepage": "https://git.ginstr.com/sbalykov/ginstrlanguage",
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
@@ -39,14 +37,12 @@
     "eslint": "^5.16.0",
     "eslint-loader": "^2.2.1",
     "mocha": "^4.1.0",
-    "rollup": "^1.20.1",
-    "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-node-resolve": "^5.2.0",
     "syntax-cli": "^0.1.12",
     "webpack": "^4.39.2",
     "webpack-cli": "^3.3.7"
   },
   "dependencies": {
     "escodegen": "^1.12.0"
-  }
+  },
+  "files": ["lib/*.js"]
 }
