@@ -564,6 +564,7 @@ MultiplicativeExpression
  */
 UnaryExpression
   : PrimaryExpression
+  | ParenthisizedExpression
   | CallExpression
   | ADDITIVE_OPERATOR UnaryExpression
     { $$ = UnaryExpression($1, $2) }

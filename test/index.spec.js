@@ -5,7 +5,23 @@ import {compile} from '../lib/ginstr-compiler.js';
 const assert = chai.assert;
 
 describe('Compiler', () => {
-    describe(' comapartion ', () => {
+    describe(' Math ', () => {
+        const tests = [
+            {script: '1 + 2;', argument: {}, result: 3, expect: ' = 3 '},
+            {script: '2 + 2 * 2;', argument: {}, result: 6, expect: ' = 6 '},
+            {script: '(2 + 2) * 2;', argument: {}, result: 8, expect: ' = 8 '},
+        ];
+        tests
+            .forEach(test => {
+                const name = test.script + ' ' + (test.expect || '');
+                it(name, function () {
+                    const expression = compile(test.script);
+                    const result = expression(test.argument);
+                    assert.equal(result, test.result, '= ');
+                })
+            })
+    });
+    describe(' comaparsion ', () => {
         const tests = [
             {script: 'now() > today();', argument: {}, result: true, expect: ' = true '},
             {script: '1 > 2;', argument: {}, result: false, expect: ' = false '},
