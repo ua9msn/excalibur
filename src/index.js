@@ -17,7 +17,7 @@ export function compile(script) {
         const ast = parser.parse(script); // AST
         const fnBody = escodegen.generate(ast);
         const expression = new Function('record', 'fns', fnBody);
-        return function (record) {
+        return function (record = {}) {
             return expression(record, fns);
         };
     } catch (err) {

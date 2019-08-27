@@ -4,122 +4,90 @@ import {compile} from '../lib/ginstr-compiler.js';
 
 const assert = chai.assert;
 
+const equalFn = function(test){
+    const name = test.script + ' ' + (test.expect || '');
+    it(name, function () {
+        const expression = compile(test.script);
+        const result = expression(test.argument);
+        assert.equal(result, test.result, '= ');
+    })
+};
+const deepEqualFn = function(test){
+    const name = test.script + ' ' + (test.expect || '');
+    it(name, function () {
+        const expression = compile(test.script);
+        const result = expression(test.argument);
+        assert.deepEqual(result, test.result, '= ');
+    })
+};
+
 describe('Compiler', () => {
-    describe(' Math ', () => {
+    describe('Math ', () => {
         const tests = [
             {script: '1 + 2;', argument: {}, result: 3, expect: ' = 3 '},
             {script: '2 + 2 * 2;', argument: {}, result: 6, expect: ' = 6 '},
             {script: '(2 + 2) * 2;', argument: {}, result: 8, expect: ' = 8 '},
         ];
-        tests
-            .forEach(test => {
-                const name = test.script + ' ' + (test.expect || '');
-                it(name, function () {
-                    const expression = compile(test.script);
-                    const result = expression(test.argument);
-                    assert.equal(result, test.result, '= ');
-                })
-            })
+        tests.forEach(equalFn);
     });
-    describe(' comaparsion ', () => {
+    describe('Logic ', () => {
         const tests = [
-            {script: 'now() > today();', argument: {}, result: true, expect: ' = true '},
-            {script: '1 > 2;', argument: {}, result: false, expect: ' = false '},
-            {script: '1 < 2;', argument: {}, result: true, expect: ' = true '},
-            {script: '1 == 1;', argument: {a: 10}, result: true, expect: ' = true '},
+            {script: 'true && true;', argument: {}, result: true, expect: ' -> true'},
+            {script: 'true && false;', argument: {}, result: false, expect: ' -> false '},
+            {script: 'true || false;', argument: {}, result: true, expect: ' -> true '},
+            {script: 'false || false;', argument: {}, result: false, expect: ' -> fasle '},
         ];
-        tests
-            .forEach(test => {
-                const name = test.script + ' ' + (test.expect || '');
-                it(name, function () {
-                    const expression = compile(test.script);
-                    const result = expression(test.argument);
-                    assert.equal(result, test.result, '= ');
-                })
-            })
+        tests.forEach(equalFn);
+    });
+    describe('comparison ', () => {
+        const tests = [
+            {script: 'now() > today();', argument: {}, result: true, expect: ' -> true '},
+            {script: '1 > 2;', argument: {}, result: false, expect: ' -> false '},
+            {script: '1 < 2;', argument: {}, result: true, expect: ' -> true '},
+            {script: '1 == 1;', argument: {a: 10}, result: true, expect: ' -> true '},
+        ];
+        tests.forEach(equalFn);
     });
     describe('Object property accessor {a: 10}', () => {
         const tests = [
             {script: 'record.a;', argument: {a: 10}, result: 10, expect: ' = 10 '},
-            {script: 'record.a < 0;', argument: {a: 10}, result: false, expect: ' = false '},
-            {script: 'record.a && record.a.b && record.a.b.c == null;', argument: {a: 10}, result: null, expect: ' true '},
+            {script: 'record.a == 10;', argument: {a: 10}, result: true, expect: ' -> true '},
+            {script: 'record.a && record.a.b && record.a.b.c == null;', argument: {a: 10}, result: null, expect: ' -> true '},
         ];
-        tests
-            .forEach(test => {
-                const name = test.script + ' ' + (test.expect || '');
-                it(name, function () {
-                    const expression = compile(test.script);
-                    const result = expression(test.argument);
-                    assert.equal(result, test.result, '= ');
-                })
-            })
+        tests.forEach(equalFn);
     });
-
     describe('Deep accessor {a: {b: "c" } ', () => {
         const tests = [
             {script: 'record;', argument: {a: {b: 'c'}}, result: {a: {b: 'c'} }, expect: 'deep equality'},
             {script: 'record.a;', argument: {a: {b: 'c'}}, result: {b: 'c'}, expect: 'deep equality'},
             {script: `record['a'];`, argument: {a: {b: 'c'}}, result: {b: 'c'}, expect: 'deep equality'},
         ];
-        tests
-            .forEach(test => {
-                const name = test.script + ' ' + (test.expect || '');
-                it(name, function () {
-                    const expression = compile(test.script);
-                    const result = expression(test.argument);
-                    assert.deepEqual(result, test.result);
-                })
-            })
+        tests.forEach(deepEqualFn)
     });
-
-
-    describe('{a: "a"}', () => {
+    describe('String value {a: "a"}', () => {
         const tests = [
             {script: 'record.a == "a";', argument: {a: 'a'}, result: true, expect: ' = true '},
             {script: 'record.a == "b";', argument: {a: 'a'}, result: false, expect: ' = false '},
-            {script: 'record.a;', argument: {a: 'a'}, result: 'a', expect: 'property accessor ok'},
+            {script: 'record.a;', argument: {a: 'a'}, result: 'a', expect: 'a'},
         ];
-        tests
-            .forEach(test => {
-                const name = test.script + ' ' + (test.expect || '');
-                it(name, function () {
-                    const expression = compile(test.script);
-                    const result = expression(test.argument);
-                    assert.equal(result, test.result, '= ');
-                })
-            })
+        tests.forEach(equalFn);
     });
-
-    describe(' boolean & null ', () => {
+    describe('boolean & null {a:true, b: false, c: null, d: undefined} ', () => {
+        const argument = {a:true, b: false, c: null, d: undefined};
         const tests = [
-            {script: 'record.a == undefined;', argument: {b: 10}, result: true, expect: '{b: 10} true'},
-            {script: 'record.a == true;', argument: {a: true}, result: true, expect: '{a: true}'},
-            {script: 'record.a == false;', argument: {a: false}, result: true, expect: '{a: false}'},
+            {script: 'record.a == true;', argument, result: true, expect: ' -> true'},
+            {script: 'record.a == false;', argument, result: false, expect: '-> false'},
+            {script: 'record.c == null;', argument, result: true, expect: ' -> true'},
+            {script: 'record.d == null;', argument, result: true, expect: ' -> true'},
         ];
-        tests
-            .forEach(test => {
-                const name = test.script + ' ' + (test.expect || '');
-                it(name, function () {
-                    const expression = compile(test.script);
-                    const result = expression(test.argument);
-                    assert.equal(result, test.result);
-                })
-            })
+        tests.forEach(equalFn);
     });
     describe(' if ', () => {
         const tests = [
             {script: 'record.b > 5 ? 1 : 3 ;', argument: {b: 10}, result: 1 },
             {script: 'record.b > 5 ? 1 : 3 ;', argument: {b: 0}, result: 3 },
         ];
-        tests
-            .forEach(test => {
-                const name = test.script + ' ' + (test.expect || '');
-                it(name, function () {
-                    const expression = compile(test.script);
-                    const result = expression(test.argument);
-                    assert.deepEqual(result, test.result);
-                })
-            })
+        tests.forEach(deepEqualFn)
     });
     describe(' realLife ', () => {
         const tests = [
@@ -142,15 +110,7 @@ describe('Compiler', () => {
                 result: {color: "red"}
             },
         ];
-        tests
-            .forEach(test => {
-                const name = test.script + ' ' + (test.expect || '');
-                it(name, function () {
-                    const expression = compile(test.script);
-                    const result = expression(test.argument);
-                    assert.deepEqual(result, test.result);
-                })
-            })
+        tests.forEach(deepEqualFn)
     });
 
 });
