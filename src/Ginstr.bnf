@@ -54,11 +54,12 @@ function UnaryExpression(operator, argument) {
 /**
  * Creates a literal node.
  */
-function Literal(typePrefix, value) {
+function Literal(value) {
   return {
-    type: typePrefix + 'Literal',
-    value,
-  };
+             type: 'Literal',
+             value: value,
+             raw: value
+           };
 }
 
 /**
@@ -73,11 +74,22 @@ function NumLiteral(value) {
 }
 
 /**
- * Creates an If-statement node.
+ * Creates a StringLiteral node.
  */
-function IfStatement(test, consequent, alternate) {
+function StringLiteral(value) {
   return {
-    type: 'IfStatement',
+    type: 'Literal',
+    value: value,
+    raw: "'" + value + "'"
+  };
+}
+
+/**
+ * Creates treanry.
+ */
+function Ternary(test, consequent, alternate) {
+  return {
+    type: 'ConditionalExpression',
     test,
     consequent,
     alternate,
@@ -114,7 +126,7 @@ function BlockStatement(statements) {
 function ObjectLiteral(properties) {
   enforceObjectProperties(properties);
   return {
-    type: 'ObjectLiteral',
+    type: 'ObjectExpression',
     properties,
   }
 }
@@ -153,7 +165,7 @@ function enforceObjectProperties(nodes) {
 function MemberExpression(object, property) {
   return {
     type: 'MemberExpression',
-    computed: false,
+    computed: property.type !== 'Identifier',
     object,
     property,
   };
@@ -170,62 +182,29 @@ function MemberExpression(object, property) {
 
 %%
 
-/**
- * Main Program.
- */
-Program
-  : ReturnStatement
-    { $$ =  $1 }
-  ;
+// Main Program.
+Program : ReturnStatement { $$ =  $1 } ;
 
-/**
- * StatementList.
- */
+// * StatementList.
 StatementList
-  : Statement
-      { $$ = [$1] }
-
-  | StatementList Statement
-      { $1.push($2); $$ = $1 }
+  : Statement { $$ = [$1] }
+  | StatementList Statement { $1.push($2); $$ = $1 }
   ;
 
-/**
- * Statements.
- */
-Statement
+// * Statements.
+ Statement
   : BlockStatement
   | EmptyStatement
-  | VariableDeclaration
-  | FunctionDeclaration
   | ExpressionStatement
-  | IfStatement
-  | IterationStatement
-  | ReturnStatement
-  | BreakStatement
-  | ContinueStatement
   ;
 
-/**
- * EmptyStatement.
- */
+// * EmptyStatement.
 EmptyStatement
-  : SEMICOLON
-    {
-      $$ = {
-        type: 'EmptyStatement',
-      }
-    }
-  ;
+  : SEMICOLON { $$ = { type: 'EmptyStatement' } } ;
 
-/**
- * BlockStatement.
- */
+// * BlockStatement.
 BlockStatement
-  : BlockOrObject
-    {
-      $$ = BlockStatement($1)
-    }
-  ;
+  : BlockOrObject { $$ = BlockStatement($1) } ;
 
 /**
  * BlockOrObject.
@@ -261,23 +240,6 @@ OptBlockOrObjectEntries
   ;
 
 /**
- * ForPropStatementInit.
- */
-ForPropStatementInit
-  : VariableDeclarationListInit
-  | LeftHandSideExpression
-  ;
-
-/**
- * ForStatementInit.
- */
-OptForStatementInit
-  : VariableDeclarationListInit
-  | Expression
-  | /* empty */ { $$ = null }
-  ;
-
-/**
  * ReturnStatement.
  */
 ReturnStatement
@@ -286,30 +248,6 @@ ReturnStatement
       $$ = {
         type: 'ReturnStatement',
         argument: $1,
-      }
-    }
-  ;
-
-/**
- * BreakStatement.
- */
-BreakStatement
-  : BREAK SEMICOLON
-    {
-      $$ = {
-        type: 'BreakStatement',
-      }
-    }
-  ;
-
-/**
- * ContinueStatement.
- */
-ContinueStatement
-  : CONTINUE SEMICOLON
-    {
-      $$ = {
-        type: 'ContinueStatement',
       }
     }
   ;
@@ -350,14 +288,11 @@ FormalParameterList
   ;
 
 /**
- * IfStatement.
+ * Ternary.
  */
-IfStatement
-  : IF LPAREN Expression RPAREN Statement %prec THEN
-    { $$ = IfStatement($3, $5) }
-
-  | IF LPAREN Expression RPAREN Statement ELSE Statement
-    { $$ = IfStatement($3, $5, $7) }
+TernaryExpression
+  : Expression QUESTION Expression COLON Expression
+    { $$ = Ternary($1, $3, $5) }
   ;
 
 /**
@@ -378,32 +313,18 @@ ExpressionStatement
  */
 Expression
   : AssignmentExpression
-    { $$ = $1 }
+  | TernaryExpression
   ;
 
 /**
  * Literal (numbers, and strings).
  */
 Literal
-  : StringLiteral
-  | NumericLiteral
-  | TRUE   { $$ = Literal('Boolean', true) }
-  | FALSE  { $$ = Literal('Boolean', false) }
-  | NULL   { $$ = Literal('Null', null) }
-  ;
-
-/**
- * StringLiteral.
- */
-StringLiteral
-  : STRING { $$ = Literal('String', $1) }
-  ;
-
-/**
- * NumericLiteral.
- */
-NumericLiteral
-  : NUMBER { $$ = NumLiteral($1) }
+  : STRING { $$ = StringLiteral($1) }
+  | NUMBER { $$ = NumLiteral($1) }
+  | TRUE   { $$ = Literal(true) }
+  | FALSE  { $$ = Literal(false) }
+  | NULL   { $$ = Literal(null) }
   ;
 
 /**
@@ -482,7 +403,7 @@ PropertyList
  * PropertyAssignment.
  */
 PropertyAssignment
-  : PropertyName COLON AssignmentExpression
+  : PropertyName COLON Expression
     {
       $$ = {
         type: 'Property',
@@ -556,14 +477,6 @@ MemberExpression
  */
 AssignmentExpression
   : LogicalORExpression
-  ;
-
-/**
- * AssignmentOperator: =, *=, /=, +=, -=.
- */
-AssignmentOperator
-  : SIMPLE_ASSIGN
-  | COMPLEX_ASSIGN
   ;
 
 /**
@@ -651,6 +564,7 @@ MultiplicativeExpression
  */
 UnaryExpression
   : PrimaryExpression
+  | ParenthisizedExpression
   | CallExpression
   | ADDITIVE_OPERATOR UnaryExpression
     { $$ = UnaryExpression($1, $2) }

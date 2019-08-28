@@ -7,7 +7,7 @@ let libraryName = pkg.name;
 
 const config = {
   entry: __dirname + '/src/index.js',
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   output: {
     path: __dirname + '/lib',
     filename: libraryName + '.js',
@@ -20,11 +20,6 @@ const config = {
       {
         test: /(\.js)$/,
         loader: 'babel-loader',
-        exclude: /node_modules/
-      },
-      {
-        test: /(\.js)$/,
-        loader: 'eslint-loader',
         exclude: /node_modules/
       }
     ]

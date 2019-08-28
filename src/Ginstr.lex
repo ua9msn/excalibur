@@ -15,8 +15,6 @@
     // ------------------------------------------------
     // Keywords.
 
-    [`\\bif\\b`,                   `return 'IF'`],
-    [`\\belse\\b`,                 `return 'ELSE'`],
     [`\\btrue\\b`,                 `return 'TRUE'`],
     [`\\bfalse\\b`,                `return 'FALSE'`],
     [`\\bnull\\b`,                 `return 'NULL'`],
@@ -43,17 +41,13 @@
     [`;`,                       `return 'SEMICOLON'`],
     [`,`,                       `return 'COMMA'`],
     [`\\.`,                     `return 'DOT'`],
+    [`\\?`,                     `return 'QUESTION'`],
 
     // ------------------------------------------------
     // Logical operators: &&, ||
 
     [`\\|\\|`,                  `return 'LOGICAL_OR'`],
     [`&&`,                      `return 'LOGICAL_AND'`],
-
-    // ------------------------------------------------
-    // Assignment operators: =, *=, /=, +=, -=,
-    [`=`,                       `return 'SIMPLE_ASSIGN'`],
-    [`(\\*|\\/|\\+|\\-)=`,      `return 'COMPLEX_ASSIGN'`],
 
     // ------------------------------------------------
     // Numbers.
@@ -75,7 +69,7 @@
     // ------------------------------------------------
     // Strings.
     [`"[^"]*"`,                 `yytext = yytext.slice(1, -1); return 'STRING';`],
-    [`'[^']*'`,                 `yytext = yytext.slice(1, -1); return 'CHAR';`],
+    [`'[^']*'`,                 `yytext = yytext.slice(1, -1); return 'STRING';`],
 
     [`{id}+`,                   `return 'IDENTIFIER'`],
   ],
