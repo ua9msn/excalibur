@@ -96,52 +96,12 @@ function Ternary(test, consequent, alternate) {
   };
 }
 
-/**
- * ForPropStatement.
- */
-function ForPropStatement(left, right, body) {
-  if (left.type === 'VariableDeclaration' && left.declarations.length !== 1) {
-    throw new Error(
-      'SyntaxError: Invalid left-hand side in for-prop loop: ' +
-      'Must have a single binding.'
-    );
-  }
-
-  return {
-    type: 'ForPropStatement',
-    left,
-    right,
-    body,
-  };
-}
-
-function BlockStatement(statements) {
-  enforceBlockStatementList(statements);
-  return {
-    type: 'BlockStatement',
-    statements,
-  };
-}
-
 function ObjectLiteral(properties) {
   enforceObjectProperties(properties);
   return {
     type: 'ObjectExpression',
     properties,
   }
-}
-
-/**
- * See `enforceObjectProperties`.
- */
-function enforceBlockStatementList(nodes) {
-  nodes.forEach(node => {
-    if (node.type == 'Property') {
-      throw new Error(
-        'Block: invalid statement.'
-      );
-    }
-  });
 }
 
 /**
@@ -173,38 +133,25 @@ function MemberExpression(object, property) {
 
 %}
 
-/**
- * The `THEN` precedence is lower, than of `ELSE`, so
- * no shift-reduce conflict, and no "dangling-else" problem.
- */
-%nonassoc THEN
-%nonassoc ELSE
-
 %%
 
 // Main Program.
 Program : ReturnStatement { $$ =  $1 } ;
-
-// * StatementList.
-StatementList
-  : Statement { $$ = [$1] }
-  | StatementList Statement { $1.push($2); $$ = $1 }
+ReturnStatement
+  : OptExpression  OptSemi
+    {
+      $$ = {
+        type: 'ReturnStatement',
+        argument: $1,
+      }
+    }
   ;
 
-// * Statements.
- Statement
-  : BlockStatement
-  | EmptyStatement
-  | ExpressionStatement
-  ;
-
-// * EmptyStatement.
-EmptyStatement
-  : SEMICOLON { $$ = { type: 'EmptyStatement' } } ;
-
-// * BlockStatement.
-BlockStatement
-  : BlockOrObject { $$ = BlockStatement($1) } ;
+OptExpression : Expression | { $$ = null } ;
+Expression : AssignmentExpression | TernaryExpression ;
+StatementList : Statement { $$ = [$1] } ;
+Statement : EmptyStatement | ExpressionStatement ;
+EmptyStatement :  { $$ = { type: 'EmptyStatement' } } ;
 
 /**
  * BlockOrObject.
@@ -230,35 +177,13 @@ BlockOrObject
  * Cover grammar: see `BlockOrObject`.
  */
 OptBlockOrObjectEntries
-  : StatementList
-
-  | PropertyList OptComma
+  : PropertyList OptComma
     { $$ = $1 }
 
   | /* empty */
     { $$ = [] }
   ;
 
-/**
- * ReturnStatement.
- */
-ReturnStatement
-  : OptExpression SEMICOLON
-    {
-      $$ = {
-        type: 'ReturnStatement',
-        argument: $1,
-      }
-    }
-  ;
-
-/**
- * Optional expression.
- */
-OptExpression
-  : Expression
-  | /* empty */ { $$ = null }
-  ;
 
 /**
  * Optional Identifier.
@@ -299,21 +224,13 @@ TernaryExpression
  * ExpressionStatement.
  */
 ExpressionStatement
-  : Expression SEMICOLON
+  : Expression
     {
       $$ = {
         type: 'ExpressionStatement',
         expression: $1,
       }
     }
-  ;
-
-/**
- * Expression.
- */
-Expression
-  : AssignmentExpression
-  | TernaryExpression
   ;
 
 /**
@@ -331,23 +248,9 @@ Literal
  * Primary expression.
  */
 PrimaryExpression
-  : LeftHandSideExpression
+  : MemberExpression
   | Literal
-  | ArrayLiteral
   | ObjectLiteral
-  ;
-
-/**
- * ArrayLiteral.
- */
-ArrayLiteral
-  : LBRACKET OptElementList RBRACKET
-    {
-      $$ = {
-        type: 'ArrayLiteral',
-        elements: $2,
-      }
-    }
   ;
 
 /**
@@ -361,13 +264,10 @@ OptElementList
     { $$ = [] }
   ;
 
-/**
- * OptComma.
- */
-OptComma
-  : COMMA
-  | /* empty */ { $$ = null }
-  ;
+OptComma : COMMA | /* empty */ { $$ = null } ;
+OptSemi : SEMICOLON | { $$ = null } ;
+
+
 
 /**
  * ElementList.
@@ -417,7 +317,7 @@ PropertyAssignment
  * PropertyName.
  */
 PropertyName
-  : StringLiteral
+  : Literal
   | Identifier
   ;
 
@@ -438,17 +338,6 @@ Identifier
         name: $1,
       }
     }
-  ;
-
-/**
- * Left-hand side expression.
- *
- * foo = 10;
- * foo['bar'] = 10;
- * foo.bar = 20;
- */
-LeftHandSideExpression
-  : MemberExpression
   ;
 
 /**
@@ -590,8 +479,7 @@ CallExpression
  * Simple function call `foo();` or chained `foo()();`.
  */
 Callee
-  : LeftHandSideExpression
-  | CustomFunctions
+  : CustomFunctions
   | CallExpression
   ;
 
