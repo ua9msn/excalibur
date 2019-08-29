@@ -2,7 +2,7 @@
   "name": "ginstr-language",
   "version": "1.0.2",
   "description": "Language to define business logic",
-  "main": "lib/ginstr-compiler.js",
+  "main": "lib/ginstr-language.js",
   "scripts": {
     "build": "npm run build:parser && npm run build:compiler && npm run test",
     "build:parser": "syntax-cli -g ./src/Ginstr.bnf --lex ./src/Ginstr.lex  --mode lalr1 -o ./lib/ginstr-parser.js",
