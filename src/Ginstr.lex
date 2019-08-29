@@ -1,5 +1,5 @@
 /**
- * Ginstr Language: Lexical Grammar.
+ * ginstr Language: Lexical Grammar.
  */
 
 {

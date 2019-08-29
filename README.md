@@ -1,4 +1,4 @@
-##Ginstr language
+## ginstr language
 
 
 The main idea is to provide the ability to create business logic for the UI side from the Android application definition (config.xml)

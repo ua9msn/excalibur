@@ -1,5 +1,5 @@
 /**
- * Ginstr Lang: BNF Grammar.
+ * ginstr Lang: BNF Grammar.
  */
 
 %{
