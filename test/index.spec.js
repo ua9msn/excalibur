@@ -1,6 +1,6 @@
 /* global describe, it, before */
 import chai from 'chai';
-import {compile} from '../lib/ginstr-compiler.js';
+import {compile} from '../lib/ginstr-language';
 
 const assert = chai.assert;
 
@@ -24,7 +24,7 @@ const deepEqualFn = function(test){
 describe('Compiler', () => {
     describe('Math ', () => {
         const tests = [
-            {script: '1 + 2;', argument: {}, result: 3, expect: ' = 3 '},
+            {script: `1 + 2`, argument: {}, result: 3, expect: ' = 3 '},
             {script: '2 + 2 * 2;', argument: {}, result: 6, expect: ' = 6 '},
             {script: '(2 + 2) * 2;', argument: {}, result: 8, expect: ' = 8 '},
         ];
@@ -61,6 +61,7 @@ describe('Compiler', () => {
             {script: 'record;', argument: {a: {b: 'c'}}, result: {a: {b: 'c'} }, expect: 'deep equality'},
             {script: 'record.a;', argument: {a: {b: 'c'}}, result: {b: 'c'}, expect: 'deep equality'},
             {script: `record['a'];`, argument: {a: {b: 'c'}}, result: {b: 'c'}, expect: 'deep equality'},
+            {script: `{'qwe':"asd"};`, argument: {a: 10}, result: {qwe:"asd"}, expect: '{"qwe":"asd"}'},
         ];
         tests.forEach(deepEqualFn)
     });
@@ -109,6 +110,7 @@ describe('Compiler', () => {
                 argument: {a: true, b: true},
                 result: {color: "red"}
             },
+
         ];
         tests.forEach(deepEqualFn)
     });
