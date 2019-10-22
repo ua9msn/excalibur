@@ -13,16 +13,11 @@ const fns = {
 };
 
 export function compile(script) {
-    try {
-        const ast = parser.parse(script); // AST
-        const fnBody = escodegen.generate(ast);
-        const expression = new Function('record', 'fns', fnBody);
-        return function (record = {}) {
-            return expression(record, fns);
-        };
-    } catch (err) {
-        console.log(err);
-        return false;
-    }
+    const ast = parser.parse(script); // AST
+    const fnBody = escodegen.generate(ast);
+    const expression = new Function('record', 'fns', fnBody);
+    return function (record = {}) {
+        return expression(record, fns);
+    };
 }
 

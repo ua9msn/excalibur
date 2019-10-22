@@ -27,6 +27,7 @@ describe('Compiler', () => {
             {script: `1 + 2`, argument: {}, result: 3, expect: ' = 3 '},
             {script: '2 + 2 * 2;', argument: {}, result: 6, expect: ' = 6 '},
             {script: '(2 + 2) * 2;', argument: {}, result: 8, expect: ' = 8 '},
+            {script: 'max(1,2,3,4,5)', argument: {}, result: 5, expect: ' = 5 '},
         ];
         tests.forEach(equalFn);
     });
