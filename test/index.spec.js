@@ -51,31 +51,31 @@ describe('Compiler', () => {
     });
     describe('Object property accessor {a: 10}', () => {
         const tests = [
-            {script: 'record.a;', argument: {a: 10}, result: 10, expect: ' = 10 '},
-            {script: 'record.a == 10;', argument: {a: 10}, result: true, expect: ' -> true '},
-            {script: 'record.a && record.a.b && record.a.b.c == null;', argument: {a: 10}, result: null, expect: ' -> true '},
+            {script: 'record.a;', argument: {record: {a: 10}}, result: 10, expect: ' = 10 '},
+            {script: 'record.a == 10;', argument: {record: {a: 10}}, result: true, expect: ' -> true '},
+            {script: 'record.a && record.a.b && record.a.b.c == null;', argument: {record: {a: 10}}, result: null, expect: ' -> true '},
         ];
         tests.forEach(equalFn);
     });
     describe('Deep accessor {a: {b: "c" } ', () => {
         const tests = [
-            {script: 'record;', argument: {a: {b: 'c'}}, result: {a: {b: 'c'} }, expect: 'deep equality'},
-            {script: 'record.a;', argument: {a: {b: 'c'}}, result: {b: 'c'}, expect: 'deep equality'},
-            {script: `record['a'];`, argument: {a: {b: 'c'}}, result: {b: 'c'}, expect: 'deep equality'},
-            {script: `{'qwe':"asd"};`, argument: {a: 10}, result: {qwe:"asd"}, expect: '{"qwe":"asd"}'},
+            {script: 'record;', argument: {record:{a: {b: 'c'}}}, result: {a: {b: 'c'} }, expect: 'deep equality'},
+            {script: 'record.a;', argument: {record: {a: {b: 'c'}}}, result: {b: 'c'}, expect: 'deep equality'},
+            {script: `record['a'];`, argument: {record:{a: {b: 'c'}}}, result: {b: 'c'}, expect: 'deep equality'},
+            {script: `{'qwe':"asd"};`, argument: {record: {a: 10}}, result: {qwe:"asd"}, expect: '{"qwe":"asd"}'},
         ];
         tests.forEach(deepEqualFn)
     });
     describe('String value {a: "a"}', () => {
         const tests = [
-            {script: 'record.a == "a";', argument: {a: 'a'}, result: true, expect: ' = true '},
-            {script: 'record.a == "b";', argument: {a: 'a'}, result: false, expect: ' = false '},
-            {script: 'record.a;', argument: {a: 'a'}, result: 'a', expect: 'a'},
+            {script: 'record.a == "a";', argument: {record: {a: 'a'}}, result: true, expect: ' = true '},
+            {script: 'record.a == "b";', argument: {record: {a: 'a'}}, result: false, expect: ' = false '},
+            {script: 'record.a;', argument: {record: {a: 'a'}}, result: 'a', expect: 'a'},
         ];
         tests.forEach(equalFn);
     });
     describe('boolean & null {a:true, b: false, c: null, d: undefined} ', () => {
-        const argument = {a:true, b: false, c: null, d: undefined};
+        const argument = {record: {a:true, b: false, c: null, d: undefined}};
         const tests = [
             {script: 'record.a == true;', argument, result: true, expect: ' -> true'},
             {script: 'record.a == false;', argument, result: false, expect: '-> false'},
@@ -86,8 +86,8 @@ describe('Compiler', () => {
     });
     describe(' if ', () => {
         const tests = [
-            {script: 'record.b > 5 ? 1 : 3 ;', argument: {b: 10}, result: 1 },
-            {script: 'record.b > 5 ? 1 : 3 ;', argument: {b: 0}, result: 3 },
+            {script: 'record.b > 5 ? 1 : 3 ;', argument: {record: {b: 10}}, result: 1 },
+            {script: 'record.b > 5 ? 1 : 3 ;', argument: {record: {b: 0}}, result: 3 },
         ];
         tests.forEach(deepEqualFn)
     });
@@ -96,19 +96,19 @@ describe('Compiler', () => {
             // {script: `record['a'] > 5 ? { color: 'red'} : { color: 'green'} ;`, argument: {a: 10}, result: { color: "red"} },
             // {script: `record['a'] < 5 ? { color: 'red'} : { color: 'green'} ;`, argument: {a: 10}, result: { color: "green"} },
             {script: `record['a'] == false ? {color: record.b == true ? 'yellow' : 'green' } : { color: 'red'};`,
-                argument: {a: false, b: false},
+                argument: {record: {a: false, b: false}},
                 result: {color: "green"}
             },
             {script: `record['a'] == true ? record.b == true ? { color:'yellow'} : {color: 'green' } : { color: 'red'};`,
-                argument: {a: true, b: true},
+                argument: {record: {a: true, b: true}},
                 result: {color: "yellow"}
             },
             {script: `record['a'] == true ? record.b == false ? { color:'yellow'} : {color: 'green' } : { color: 'red'};`,
-                argument: {a: true, b: true},
+                argument: {record: {a: true, b: true}},
                 result: {color: "green"}
             },
             {script: `record['a'] == false ? record.b == false ? { color:'yellow'} : {color: 'green' } : { color: 'red'};`,
-                argument: {a: true, b: true},
+                argument: {record: {a: true, b: true}},
                 result: {color: "red"}
             },
 
