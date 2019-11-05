@@ -111,6 +111,10 @@ describe('Compiler', () => {
                 argument: {record: {a: true, b: true}},
                 result: {color: "red"}
             },
+            {script: `record['a'] == true ? {color: 'red'} : (record.b == true ? {color: 'green' } : null) ;`,
+                argument: {record: {a: true, b: true}},
+                result: {color: "red"}
+            },
 
         ];
         tests.forEach(deepEqualFn)
