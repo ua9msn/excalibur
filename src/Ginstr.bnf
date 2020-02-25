@@ -241,6 +241,7 @@ AdditiveExpression
 /**
  * x * y
  * x / y
+ * x % y
  */
 MultiplicativeExpression
   : UnaryExpression

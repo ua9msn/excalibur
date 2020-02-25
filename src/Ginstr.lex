@@ -22,6 +22,7 @@
 
     // ------------------------------------------------
     // Functions
+    [`\\babs`, `return 'FN'`],
     [`\\bmax`, `return 'FN'`],
     [`\\bmin`, `return 'FN'`],
     [`\\bround`, `return 'FN'`],
@@ -60,7 +61,7 @@
     // ------------------------------------------------
     // Math operators: +, -, *, /
     [`(\\+|\\-)`,               `return 'ADDITIVE_OPERATOR'`],
-    [`(\\*|\\/)`,               `return 'MULTIPLICATIVE_OPERATOR'`],
+    [`(\\*|\\/|%)`,             `return 'MULTIPLICATIVE_OPERATOR'`],
 
     // ------------------------------------------------
     // Relational operators: >, >=, <, <=

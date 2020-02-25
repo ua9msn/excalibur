@@ -1,6 +1,7 @@
 import parser from '../lib/ginstr-parser.js';
 import escodegen from 'escodegen';
 const fns = {
+    abs:   Math.abs,
     max:   Math.max,
     min:   Math.min,
     round: Math.round,

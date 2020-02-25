@@ -8,7 +8,7 @@ The ginstr language can evaluate expressions only (at least in current version).
 
 ##### Math and Logic operators
    
-Math ` + - * /`      
+Math ` + - * / %`      
 Relational operators: `>, >=, <, <=`  
 Logical operators  ` &&, ||`  
 Equality operators  `==, !=`  
@@ -30,6 +30,7 @@ Inside the formula the next "global" functions are avalable:
 
 | Function | Example |      |
 |----------|---------|------|
+| `abs` | `abs(-1) -> 1` | Return the absolute value of number |  
 | `max` | `max(1,3,5) -> 5` | Return the max value from it's numeric arguments |  
 | `min` | `min(1,3,5) -> 1` | Return the max value from it's numeric arguments |   
 | `round` | `round(1.2) -> 1`  <br> `round(1.6) -> 2`  | Return rounded number |  
@@ -62,7 +63,7 @@ Incorrect types will be either transformed either ignored, in any case it may br
 
 | Event              | Run case | returned value |
 |--------------------|------|------|
-| RECORD_IS_VALID    | Runs before record going to be saved to serverside | boolean |
+| RECORD_IS_VALID    | Runs before record going to be saved to serverside | boolean or error object|
 | RECORD_IS_EDITABLE | Runs at the moment when user tries to open editor for any cell | boolean |
 | RECORD_ON_CHANGE   | Not used yet | mutator object|
 | ROW_STYLE          | Runs on every cell render (row added/modified/scrolled into view)| style object|
@@ -70,6 +71,16 @@ Incorrect types will be either transformed either ignored, in any case it may br
 | FIELD_IS_EDITABLE  | Run at the moment when user tries to open editor for this cell| boolean |
 | FIELD_ON_CHANGE    | Runs right after user finished editing of the cell| mutator object |
 | CELL_STYLE         | Runs on every cell render (row added/modified/scrolled into view) | style object |
+
+##### Error object
+example: 
+
+     {
+        result: 'value is incorrect as ${name} think',
+        attributes: {
+          name: 'Dejan'
+        } 
+     }
 
 ##### Style object
 example: 
@@ -197,4 +208,9 @@ For FIELD and CELL types the `field` property is required.
  `record.a && record.a.b && record.a.b.c && record.a.b.c.d`  
 
 
+### Changelog
+#####2.1.0
+* Added `%` operator. 
+* Added `abs` function.
+* Validation can return error object    
 
