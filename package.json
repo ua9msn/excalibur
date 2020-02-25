@@ -1,6 +1,6 @@
 {
   "name": "ginstr-language",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Language to define business logic",
   "main": "lib/ginstr-language.js",
   "scripts": {
