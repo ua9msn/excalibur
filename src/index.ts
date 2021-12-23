@@ -1,4 +1,4 @@
-import parser from '../lib/excalibur-parser.js';
+import parser from './parser';
 import escodegen from 'escodegen';
 const fns = {
     abs:   Math.abs,
@@ -13,11 +13,11 @@ const fns = {
     }
 };
 
-export function compile(script) {
+export function compile(script:string):Function {
     const ast = parser.parse(script); // AST
     const fnBody = escodegen.generate(ast);
     const expression = new Function('data', 'fns', fnBody);
-    return function ({record = {}}) {
-        return expression(record, fns);
+    return function ({data = {}} = {}) {
+        return expression(data, fns);
     };
 }

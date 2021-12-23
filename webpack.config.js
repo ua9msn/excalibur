@@ -12,8 +12,9 @@ const config = {
   output: {
     path: __dirname + '/lib',
     filename: libraryName + '.js',
-    library: libraryName,
-    libraryTarget: 'commonjs',
+    library: {
+      type: "commonjs"
+    },
     globalObject: 'typeof self !== \'undefined\' ? self : this',
   },
   module: {

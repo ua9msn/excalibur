@@ -6,9 +6,9 @@
   "type": "commonjs",
   "scripts": {
     "build": "npm run build:parser && npm run build:compiler && npm run test",
-    "build:parser": "syntax-cli -g src/excalibur.bnf --lex src/excalibur.lex  --mode lalr1 -o ./lib/excalibur-parser.js",
-    "build:compiler": "tsc",
-    "test": "mocha --colors ./test/*.spec.ts",
+    "build:parser": "syntax-cli -g src/excalibur.bnf --lex src/excalibur.lex  --mode lalr1 -o ./src/parser.js",
+    "build:compiler": "webpack",
+    "test": "mocha",
     "test:watch": "mocha --colors -w ./test/*.spec.ts"
   },
   "repository": {
