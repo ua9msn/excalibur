@@ -1,17 +1,13 @@
-/* global __dirname, require, module*/
-
 const path = require('path');
 const pkg = require('./package.json');
 
-let libraryName = pkg.name;
-
 const config = {
   entry: __dirname + '/src/index.ts',
-  mode: "development",
-  devtool: 'source-map',
+  mode: "production",
+  devtool: false,
   output: {
     path: __dirname + '/lib',
-    filename: libraryName + '.js',
+    filename: pkg.name + '.js',
     library: {
       type: "commonjs"
     },

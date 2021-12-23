@@ -9,7 +9,7 @@
     "build:parser": "syntax-cli -g src/excalibur.bnf --lex src/excalibur.lex  --mode lalr1 -o ./src/parser.js",
     "build:compiler": "webpack",
     "test": "mocha",
-    "test:watch": "mocha --colors -w ./test/*.spec.ts"
+    "test:watch": "mocha -w"
   },
   "repository": {
     "type": "git",
