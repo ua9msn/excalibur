@@ -1,0 +1,294 @@
+/**
+ * excalibur: BNF Grammar.
+ */
+
+%{
+
+/**
+ * Creates generic binary expression node.
+ */
+function BinaryExpression(left, operator, right) {
+  return {
+    type: 'BinaryExpression',
+    operator,
+    left,
+    right
+  };
+}
+
+/**
+ * Creates generic binary expression node.
+ */
+function MathExpression(fn, args) {
+  return {
+    type: 'BinaryExpression',
+    operator,
+    left,
+    right
+  };
+}
+
+/**
+ * Creates logical expression node.
+ */
+function LogicalExpression(left, operator, right) {
+  return {
+    type: 'LogicalExpression',
+    operator,
+    left,
+    right
+  };
+}
+
+/**
+ * Creates an unary expression node.
+ */
+function UnaryExpression(operator, argument) {
+  return {
+    type: 'UnaryExpression',
+    operator,
+    argument,
+  };
+}
+
+/**
+ * Creates a literal node.
+ */
+function Literal(value) {
+  return {
+             type: 'Literal',
+             value: value,
+             raw: value
+           };
+}
+
+/**
+ * Creates a NumLiteral node.
+ */
+function NumLiteral(value) {
+  return {
+    type: 'Literal',
+    value: Number(value),
+    raw: value
+  };
+}
+
+/**
+ * Creates a StringLiteral node.
+ */
+function StringLiteral(value) {
+  return {
+    type: 'Literal',
+    value: value,
+    raw: "'" + value + "'"
+  };
+}
+
+/**
+ * Creates treanry.
+ */
+function Ternary(test, consequent, alternate) {
+  return {
+    type: 'ConditionalExpression',
+    test,
+    consequent,
+    alternate,
+  };
+}
+
+function ObjectLiteral(properties) {
+  enforceObjectProperties(properties);
+  return {
+    type: 'ObjectExpression',
+    properties,
+  }
+}
+
+/**
+ * Since we use cover grammar to parse blocks and objects,
+ * this function checks that all entries in a block are
+ * object properties.
+ */
+function enforceObjectProperties(nodes) {
+  nodes.forEach(node => {
+    if (node.type !== 'Property') {
+      throw new Error(
+        'ObjectLiteral: invalid property declaration.'
+      );
+    }
+  });
+}
+
+/**
+ * MemberExpression.
+ */
+function MemberExpression(object, property) {
+  return {
+    type: 'MemberExpression',
+    computed: property.type !== 'Identifier',
+    object,
+    property,
+  };
+}
+
+%}
+
+%%
+
+// Main Program.
+Program : ReturnStatement { $$ =  $1 } ;
+ReturnStatement
+  : OptExpression OptSemi
+    {
+      $$ = {
+        type: 'ReturnStatement',
+        argument: $1,
+      }
+    }
+  ;
+
+Expression : PrecedenceExpression | TernaryExpression ;
+BlockOrObject : LCURLY OptBlockOrObjectEntries RCURLY { $$ = $2 } ;
+OptExpression : Expression | { $$ = null } ;
+OptBlockOrObjectEntries : PropertyList OptComma { $$ = $1 } | { $$ = [] } ;
+TernaryExpression : Expression QUESTION Expression COLON Expression { $$ = Ternary($1, $3, $5) } ;
+PrimaryExpression : MemberExpression | Literal | ObjectLiteral ;
+OptComma : COMMA | /* empty */ { $$ = null } ;
+OptSemi : SEMICOLON | { $$ = null } ;
+ObjectLiteral : BlockOrObject { $$ = ObjectLiteral($1) } ;
+PropertyName : Literal | Identifier ;
+ParenthisizedExpression : LPAREN Expression RPAREN { $$ = $2 } ;
+PrecedenceExpression : LogicalORExpression ;
+MemberExpression
+  : MemberExpression LBRACKET Expression RBRACKET { $$ = MemberExpression($1, $3)}
+  | MemberExpression DOT Identifier { $$ = MemberExpression($1, $3)}
+  | Identifier
+  ;
+PropertyList
+  : PropertyAssignment { $$ = [$1] }
+  | PropertyList COMMA PropertyAssignment { $1.push($3); $$ = $1 }
+  ;
+PropertyAssignment
+  : PropertyName COLON Expression
+    {
+      $$ = {
+        type: 'Property',
+        key: $1,
+        value: $3,
+      }
+    }
+  ;
+
+Literal
+  : STRING { $$ = StringLiteral($1) }
+  | NUMBER { $$ = NumLiteral($1) }
+  | TRUE   { $$ = Literal(true) }
+  | FALSE  { $$ = Literal(false) }
+  | NULL   { $$ = Literal(null) }
+  ;
+
+Identifier
+    : IDENTIFIER
+        { $$ = {
+            type: 'Identifier',
+            name: $1,
+        }
+    }
+    ;
+
+/* x || y */
+LogicalORExpression
+  : LogicalANDExpression
+  | LogicalORExpression LOGICAL_OR LogicalANDExpression
+      { $$ = LogicalExpression($1, $2, $3) }
+  ;
+/** * x && y */
+LogicalANDExpression
+  : EqualityExpression
+  | LogicalANDExpression LOGICAL_AND EqualityExpression
+      { $$ = LogicalExpression($1, $2, $3) }
+  ;
+
+/**  x == y , x != y */
+EqualityExpression
+  : RelationalExpression
+  | EqualityExpression EQUALITY_OPERATOR RelationalExpression
+      { $$ = BinaryExpression($1, $2, $3) }
+  ;
+
+/**
+ * x > y
+ * x >= y
+ * x < y
+ * x <= y
+ */
+RelationalExpression
+  : AdditiveExpression
+  | RelationalExpression RELATIONAL_OPERATOR AdditiveExpression
+      { $$ = BinaryExpression($1, $2, $3) }
+  ;
+
+/**
+ * x + y
+ * x - y
+ */
+AdditiveExpression
+  : MultiplicativeExpression
+  | AdditiveExpression ADDITIVE_OPERATOR MultiplicativeExpression
+      { $$ = BinaryExpression($1, $2, $3) }
+  ;
+
+/**
+ * x * y
+ * x / y
+ * x % y
+ */
+MultiplicativeExpression
+  : UnaryExpression
+  | MultiplicativeExpression MULTIPLICATIVE_OPERATOR UnaryExpression
+      { $$ = BinaryExpression($1, $2, $3) }
+  ;
+
+UnaryExpression
+  : PrimaryExpression
+  | ParenthisizedExpression
+  | CallExpression
+  | ADDITIVE_OPERATOR UnaryExpression { $$ = UnaryExpression($1, $2) }
+  ;
+
+CallExpression
+  : Callee Arguments
+    {
+      $$ = {
+        type: 'CallExpression',
+        callee: $1,
+        arguments: $2,
+      };
+    }
+  ;
+
+Callee : CustomFunctions | CallExpression ;
+Arguments : LPAREN OptArgumentList RPAREN { $$ = $2 } ;
+OptArgumentList : ArgumentList | /* empty */ { $$ = [] } ;
+ArgumentList
+  : PrecedenceExpression
+    { $$ = [$1] }
+  | ArgumentList COMMA PrecedenceExpression
+    { $$ = $1; $1.push($3) }
+  ;
+
+CustomExpressions
+ : FN
+ { $$ = {
+     "type": "Identifier",
+     "name": $1
+     }
+ };
+
+CustomFunctions
+  : CustomExpressions
+  { $$ = MemberExpression({
+            "type": "Identifier",
+            "name": "fns"
+            }, $1)
+  } ;

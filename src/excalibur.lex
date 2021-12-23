@@ -1,5 +1,5 @@
 /**
- * Ginstr Language: Lexical Grammar.
+ * exclibur: Lexical Grammar.
  */
 
 {
@@ -15,8 +15,6 @@
     // ------------------------------------------------
     // Keywords.
 
-    [`\\bif\\b`,                   `return 'IF'`],
-    [`\\belse\\b`,                 `return 'ELSE'`],
     [`\\btrue\\b`,                 `return 'TRUE'`],
     [`\\bfalse\\b`,                `return 'FALSE'`],
     [`\\bnull\\b`,                 `return 'NULL'`],
@@ -24,6 +22,7 @@
 
     // ------------------------------------------------
     // Functions
+    [`\\babs`, `return 'FN'`],
     [`\\bmax`, `return 'FN'`],
     [`\\bmin`, `return 'FN'`],
     [`\\bround`, `return 'FN'`],
@@ -43,17 +42,13 @@
     [`;`,                       `return 'SEMICOLON'`],
     [`,`,                       `return 'COMMA'`],
     [`\\.`,                     `return 'DOT'`],
+    [`\\?`,                     `return 'QUESTION'`],
 
     // ------------------------------------------------
     // Logical operators: &&, ||
 
     [`\\|\\|`,                  `return 'LOGICAL_OR'`],
     [`&&`,                      `return 'LOGICAL_AND'`],
-
-    // ------------------------------------------------
-    // Assignment operators: =, *=, /=, +=, -=,
-    [`=`,                       `return 'SIMPLE_ASSIGN'`],
-    [`(\\*|\\/|\\+|\\-)=`,      `return 'COMPLEX_ASSIGN'`],
 
     // ------------------------------------------------
     // Numbers.
@@ -66,7 +61,7 @@
     // ------------------------------------------------
     // Math operators: +, -, *, /
     [`(\\+|\\-)`,               `return 'ADDITIVE_OPERATOR'`],
-    [`(\\*|\\/)`,               `return 'MULTIPLICATIVE_OPERATOR'`],
+    [`(\\*|\\/|%)`,             `return 'MULTIPLICATIVE_OPERATOR'`],
 
     // ------------------------------------------------
     // Relational operators: >, >=, <, <=
@@ -75,7 +70,7 @@
     // ------------------------------------------------
     // Strings.
     [`"[^"]*"`,                 `yytext = yytext.slice(1, -1); return 'STRING';`],
-    [`'[^']*'`,                 `yytext = yytext.slice(1, -1); return 'CHAR';`],
+    [`'[^']*'`,                 `yytext = yytext.slice(1, -1); return 'STRING';`],
 
     [`{id}+`,                   `return 'IDENTIFIER'`],
   ],
