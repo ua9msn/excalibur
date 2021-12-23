@@ -6,27 +6,28 @@ const pkg = require('./package.json');
 let libraryName = pkg.name;
 
 const config = {
-  entry: __dirname + '/src/index.js',
+  entry: __dirname + '/src/index.ts',
+  mode: "development",
   devtool: 'source-map',
   output: {
     path: __dirname + '/lib',
     filename: libraryName + '.js',
     library: libraryName,
-    libraryTarget: 'umd',
+    libraryTarget: 'commonjs',
     globalObject: 'typeof self !== \'undefined\' ? self : this',
   },
   module: {
     rules: [
       {
-        test: /(\.js)$/,
-        loader: 'babel-loader',
+        test: /(\.js|ts)$/,
+        loader: 'ts-loader',
         exclude: /node_modules/
       }
     ]
   },
   resolve: {
     modules: [path.resolve('./node_modules'), path.resolve('./src')],
-    extensions: ['.json', '.js']
+    extensions: ['.json', '.js', '.ts']
   }
 };
 

@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ESNext",
+        "sourceMap": true,
+        "moduleResolution": "Node",
+        "allowSyntheticDefaultImports": true,
+        "allowJs": true,
+        "esModuleInterop": true,
+        "pretty": false,
+
+    },
+    "exclude": [
+        "node_modules", "lib"
+    ],
+    "include": [
+        "./src/index.ts"
+    ]
+}

@@ -1,5 +1,5 @@
 /**
- * ginstr Language: Lexical Grammar.
+ * exclibur: Lexical Grammar.
  */
 
 {

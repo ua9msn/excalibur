@@ -1,8 +1,4 @@
-/* global describe, it, before */
-import chai from 'chai';
-import {compile} from '../lib/ginstr-language';
-
-const assert = chai.assert;
+import {compile} from '../lib/excalibur.js';
 
 const equalFn = function(test){
     const name = test.script + ' ' + (test.expect || '');
