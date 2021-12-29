@@ -43,7 +43,7 @@ Inside the formula the next "global" functions are avalable:
 
 
 
-### Usage
+### Usage in your code
 
 ##### Core: 
 All scripts going to be compiled into the next function:  
