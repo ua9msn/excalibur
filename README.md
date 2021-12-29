@@ -8,6 +8,16 @@ Just letting the user program would be too dangerous.
 So, we need some kind of language that is safe to embed in the site and, in fact, it should be an expression calculator, not a language.  
 JS is a good candidate for it, since we already have the interpreter inside, but we need to exclude statements, like `if` `for` etc 
 
+### How to
+
+First of all, we need to build the language parser. Clone the repo and run `npm build:parser` to do that. 
+It will create the `parser.js` file in the `src` directory. It's an intermediary file that we will use. 
+The reason why it is not included into the distributive is that we can change the lex and grammatical definitions.  
+Now we can build the compiler. The command `npm run build:compiler` does it. 
+This will create the file we will include into the source code of the client application.
+
+Here below is the function and operators already included into the language definition.
+
 ### Grammar
 
 ##### Math and Logic operators
@@ -56,3 +66,5 @@ function(data){
 The `data` is a usual JS object.   
 Accessing an any filed could be done in two ways: `data.field` or `data["field"]`  
 Both ways are equal except in first case it's not possible to access the field containing dash in the name.
+
+
