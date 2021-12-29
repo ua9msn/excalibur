@@ -1,5 +1,5 @@
 {
-  "name": "excalibur",
+  "name": "@ua9msn/excalibur",
   "version": "2.1.0",
   "description": "Expression calculator, safe for client side",
   "main": "lib/excalibur.js",
